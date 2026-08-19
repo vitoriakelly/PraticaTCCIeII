@@ -1,0 +1,10 @@
+{
+  "n_cases": 40,
+  "n_with_lesion": 40,
+  "lesion_volume_ml_mean": 24.425600000000003,
+  "lesion_volume_ml_median": 6.976,
+  "lesion_volume_ml_min": 0.04,
+  "lesion_volume_ml_max": 482.152,
+  "unique_dwi_shapes": 2,
+  "unique_flair_shapes": 5
+}

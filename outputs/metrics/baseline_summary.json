@@ -1,0 +1,10 @@
+{
+  "n_evaluated": 40,
+  "dice_mean": 0.16839945048125587,
+  "dice_std": 0.20458533110763993,
+  "dice_median": 0.049513434563567556,
+  "iou_mean": 0.10715309953904431,
+  "iou_std": 0.1405404771860873,
+  "iou_median": 0.02546458597821022,
+  "method": "limiar adaptativo DWI + restrição ADC + morfologia"
+}
