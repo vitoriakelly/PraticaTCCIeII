@@ -1,4 +1,4 @@
-"""Interface CAD (prova de conceito) — baseline ISLES-2022.
+"""Interface CAD (prova de conceito) — baseline e U-Net no ISLES-2022.
 
 Uso:
   cd /Users/vitoriakelly/Documents/TCC
@@ -8,6 +8,7 @@ Uso:
 
 from __future__ import annotations
 
+import io
 import sys
 import tempfile
 from pathlib import Path
@@ -21,9 +22,10 @@ ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = ROOT / "pratica" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
-from baseline_threshold import (  # noqa: E402
+from baseline_threshold import baseline_segment  # noqa: E402
+from isles_common import (  # noqa: E402
+    CKPT_DIR,
     DATA_DIR,
-    baseline_segment,
     dice_score,
     iou_score,
     list_subjects,
@@ -35,6 +37,24 @@ st.set_page_config(
     page_title="CAD AVC — TCC",
     page_icon="🧠",
     layout="wide",
+    menu_items={
+        "Get help": None,
+        "Report a bug": None,
+        "About": None,
+    },
+)
+
+# Remove o botão Deploy e itens da barra superior (não fazem parte do CAD)
+st.markdown(
+    """
+    <style>
+    .stDeployButton, [data-testid="stToolbar"] {display: none !important; visibility: hidden !important;}
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 
@@ -62,7 +82,38 @@ def volume_ml(mask: np.ndarray, zooms: tuple[float, float, float] = (1.0, 1.0, 1
     return float(mask.astype(bool).sum() * voxel_ml)
 
 
-def show_slice(dwi: np.ndarray, pred: np.ndarray, gt: np.ndarray | None, z: int) -> None:
+@st.cache_resource
+def load_unet(ckpt_path: str):
+    import torch
+    from isles_dataset import predict_volume
+    from unet_model import UNet2D
+
+    ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+    args = ckpt.get("args", {})
+    model = UNet2D(in_channels=2, out_channels=1, base=int(args.get("base_channels", 32)))
+    model.load_state_dict(ckpt["model_state"])
+    model.eval()
+    if torch.backends.mps.is_available():
+        device = torch.device("mps")
+    elif torch.cuda.is_available():
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+    model.to(device)
+    size = int(args.get("size", 128))
+    return model, device, size, predict_volume
+
+
+def segment(method: str, dwi: np.ndarray, adc: np.ndarray, ckpt: Path | None) -> np.ndarray:
+    if method == "Baseline (limiar)":
+        return baseline_segment(dwi, adc)
+    if ckpt is None or not ckpt.exists():
+        raise FileNotFoundError("Checkpoint U-Net não encontrado. Treine o modelo antes.")
+    model, device, size, predict_volume = load_unet(str(ckpt))
+    return predict_volume(model, dwi, adc, size=size, thr=0.5, device=device)
+
+
+def show_slice(dwi: np.ndarray, pred: np.ndarray, gt: np.ndarray | None, z: int, method: str) -> None:
     fig, axes = plt.subplots(1, 3 if gt is not None else 2, figsize=(11, 3.4))
     axes = np.atleast_1d(axes)
 
@@ -76,7 +127,7 @@ def show_slice(dwi: np.ndarray, pred: np.ndarray, gt: np.ndarray | None, z: int)
         cmap="winter",
         alpha=0.5,
     )
-    axes[1].set_title("Predição (baseline)")
+    axes[1].set_title(f"Predição ({method})")
     axes[1].axis("off")
 
     if gt is not None:
@@ -97,16 +148,22 @@ def show_slice(dwi: np.ndarray, pred: np.ndarray, gt: np.ndarray | None, z: int)
 def main() -> None:
     st.title("CAD — Apoio à segmentação de AVC isquêmico")
     st.caption(
-        "Prova de conceito do TCC: baseline clássico (DWI + ADC + morfologia). "
+        "Prova de conceito do TCC: baseline clássico e U-Net (DWI + ADC). "
         "Ferramenta de apoio — a decisão final é do especialista."
     )
 
+    default_ckpt = CKPT_DIR / "unet2d_isles_best.pt"
+
     with st.sidebar:
+        st.header("Configuração")
+        method = st.radio("Método", ["Baseline (limiar)", "U-Net"], index=0)
+        ckpt_file = st.text_input("Checkpoint U-Net", value=str(default_ckpt))
+        ckpt = Path(ckpt_file)
+        if method == "U-Net" and not ckpt.exists():
+            st.warning("Checkpoint ausente. Rode `train_unet.py` antes.")
+
         st.header("Entrada")
         mode = st.radio("Fonte dos dados", ["Caso ISLES-2022", "Upload NIfTI"], index=0)
-
-        dwi = adc = gt = None
-        subject_label = "upload"
 
         if mode == "Caso ISLES-2022":
             if not DATA_DIR.exists():
@@ -117,16 +174,21 @@ def main() -> None:
                 st.error("Nenhum sujeito encontrado no ISLES-2022.")
                 st.stop()
             subject = st.selectbox("Caso", subjects)
-            subject_label = subject
             if st.button("Carregar e segmentar", type="primary"):
                 with st.spinner("Processando..."):
                     dwi, adc, gt = load_case(subject)
+                    try:
+                        pred = segment(method, dwi, adc, ckpt)
+                    except Exception as exc:  # noqa: BLE001
+                        st.error(str(exc))
+                        st.stop()
                     st.session_state["case"] = {
                         "dwi": dwi,
                         "adc": adc,
                         "gt": gt,
-                        "label": subject_label,
-                        "pred": baseline_segment(dwi, adc),
+                        "label": subject,
+                        "pred": pred,
+                        "method": method,
                     }
         else:
             up_dwi = st.file_uploader("DWI (.nii / .nii.gz)", type=["nii", "gz"])
@@ -143,15 +205,19 @@ def main() -> None:
                         if dwi.shape != adc.shape:
                             st.error("DWI e ADC com dimensões diferentes.")
                         else:
+                            try:
+                                pred = segment(method, dwi, adc, ckpt)
+                            except Exception as exc:  # noqa: BLE001
+                                st.error(str(exc))
+                                st.stop()
                             st.session_state["case"] = {
                                 "dwi": dwi,
                                 "adc": adc,
                                 "gt": gt,
                                 "label": "upload",
-                                "pred": baseline_segment(dwi, adc),
+                                "pred": pred,
+                                "method": method,
                             }
-
-       
 
     case = st.session_state.get("case")
     if case is None:
@@ -159,7 +225,8 @@ def main() -> None:
         return
 
     dwi, adc, gt, pred = case["dwi"], case["adc"], case["gt"], case["pred"]
-    st.subheader(f"Caso: `{case['label']}`")
+    method_used = case.get("method", "—")
+    st.subheader(f"Caso: `{case['label']}` · método: **{method_used}**")
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Shape DWI", str(dwi.shape))
@@ -167,16 +234,23 @@ def main() -> None:
     col3.metric("Volume predito*", f"{volume_ml(pred):.2f} mL")
     if gt is not None and gt.shape == pred.shape:
         col4.metric("Dice", f"{dice_score(pred, gt):.3f}")
-        st.caption(f"IoU = {iou_score(pred, gt):.3f}  |  *volume assume espaçamento 1×1×1 mm se não informado.")
+        st.caption(
+            f"IoU = {iou_score(pred, gt):.3f}  |  "
+            "*volume assume espaçamento 1×1×1 mm se não informado."
+        )
     else:
         col4.metric("Dice", "—")
         st.caption("*Volume aproximado (espaçamento 1×1×1 mm). GT indisponível ou incompatível.")
 
     z_default = mid_slice(gt if gt is not None and gt.any() else pred)
     z = st.slider("Fatia (eixo Z)", 0, int(dwi.shape[-1] - 1), z_default)
-    show_slice(dwi, pred, gt if gt is not None and gt.shape == pred.shape else None, z)
-
-    import io
+    show_slice(
+        dwi,
+        pred,
+        gt if gt is not None and gt.shape == pred.shape else None,
+        z,
+        method_used,
+    )
 
     buf = io.BytesIO()
     np.save(buf, pred.astype(np.uint8))

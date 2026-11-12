@@ -1,0 +1,48 @@
+{
+  "train": [
+    "sub-strokecase0033",
+    "sub-strokecase0008",
+    "sub-strokecase0040",
+    "sub-strokecase0019",
+    "sub-strokecase0005",
+    "sub-strokecase0038",
+    "sub-strokecase0017",
+    "sub-strokecase0006",
+    "sub-strokecase0026",
+    "sub-strokecase0029",
+    "sub-strokecase0022",
+    "sub-strokecase0021",
+    "sub-strokecase0036",
+    "sub-strokecase0025",
+    "sub-strokecase0011",
+    "sub-strokecase0028",
+    "sub-strokecase0032",
+    "sub-strokecase0031",
+    "sub-strokecase0027",
+    "sub-strokecase0007",
+    "sub-strokecase0030",
+    "sub-strokecase0012",
+    "sub-strokecase0024",
+    "sub-strokecase0010",
+    "sub-strokecase0037",
+    "sub-strokecase0023",
+    "sub-strokecase0020",
+    "sub-strokecase0004"
+  ],
+  "val": [
+    "sub-strokecase0001",
+    "sub-strokecase0016",
+    "sub-strokecase0018",
+    "sub-strokecase0035",
+    "sub-strokecase0013",
+    "sub-strokecase0015"
+  ],
+  "test": [
+    "sub-strokecase0039",
+    "sub-strokecase0003",
+    "sub-strokecase0034",
+    "sub-strokecase0002",
+    "sub-strokecase0014",
+    "sub-strokecase0009"
+  ]
+}

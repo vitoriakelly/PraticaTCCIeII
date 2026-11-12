@@ -1,0 +1,12 @@
+{
+  "n_evaluated": 6,
+  "split": "test",
+  "checkpoint": "pratica/outputs/checkpoints/unet2d_isles_best.pt",
+  "dice_mean": 0.3628677614767601,
+  "dice_std": 0.27403454134289296,
+  "dice_median": 0.33248828757826526,
+  "iou_mean": 0.2525177791446372,
+  "iou_std": 0.22276076770190886,
+  "iou_median": 0.20687218359625048,
+  "method": "U-Net 2D (DWI+ADC)"
+}
