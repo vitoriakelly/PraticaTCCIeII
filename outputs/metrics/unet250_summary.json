@@ -1,0 +1,16 @@
+{
+  "n_evaluated": 37,
+  "split": "test",
+  "checkpoint": "pratica/outputs/checkpoints/unet2d_isles250_best.pt",
+  "postprocess": true,
+  "dice_mean": 0.5210890304605371,
+  "dice_std": 0.3289877670799529,
+  "dice_median": 0.6641221374045801,
+  "iou_mean": 0.4124478823018161,
+  "iou_median": 0.49714285714285716,
+  "precision_mean": 0.7935206607485994,
+  "recall_mean": 0.5129601755585577,
+  "infer_sec_mean": 0.49051351351351363,
+  "infer_sec_median": 0.478,
+  "method": "U-Net 2D (unet250)"
+}

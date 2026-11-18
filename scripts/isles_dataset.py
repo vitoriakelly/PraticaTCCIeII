@@ -34,6 +34,25 @@ class SliceIndex:
     has_lesion: bool
 
 
+def augment_slice(
+    x: np.ndarray,
+    y: np.ndarray,
+    rng: np.random.Generator,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Augmentation leve 2D: flip e rotação 90° (x: C×H×W, y: H×W)."""
+    if rng.random() < 0.5:
+        x = np.flip(x, axis=2).copy()
+        y = np.flip(y, axis=1).copy()
+    if rng.random() < 0.5:
+        x = np.flip(x, axis=1).copy()
+        y = np.flip(y, axis=0).copy()
+    k = int(rng.integers(0, 4))
+    if k:
+        x = np.rot90(x, k=k, axes=(1, 2)).copy()
+        y = np.rot90(y, k=k, axes=(0, 1)).copy()
+    return x.astype(np.float32), y.astype(np.float32)
+
+
 class IslesSliceDataset(Dataset):
     """Fatias axiais redimensionadas; prioriza fatias com lesão."""
 
@@ -44,9 +63,12 @@ class IslesSliceDataset(Dataset):
         include_empty_ratio: float = 0.25,
         seed: int = 42,
         cache_volumes: bool = True,
+        augment: bool = False,
     ) -> None:
         self.size = size
         self.cache_volumes = cache_volumes
+        self.augment = augment
+        self._rng = np.random.default_rng(seed + 17)
         self._cache: dict[str, tuple[np.ndarray, np.ndarray]] = {}
         self.indices: list[SliceIndex] = []
 
@@ -99,9 +121,13 @@ class IslesSliceDataset(Dataset):
         x1 = resize2d(x[1], self.size)
         y_r = resize2d(y, self.size)
         y_r = (y_r >= 0.5).astype(np.float32)
+        x_np = np.stack([x0, x1], axis=0)
+        if self.augment:
+            x_np, y_r = augment_slice(x_np, y_r, self._rng)
+            y_r = (y_r >= 0.5).astype(np.float32)
 
-        x_t = torch.from_numpy(np.stack([x0, x1], axis=0))
-        y_t = torch.from_numpy(y_r[None, ...])
+        x_t = torch.from_numpy(np.ascontiguousarray(x_np))
+        y_t = torch.from_numpy(np.ascontiguousarray(y_r[None, ...]))
         return {
             "image": x_t,
             "mask": y_t,

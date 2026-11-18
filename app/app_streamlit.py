@@ -1,7 +1,7 @@
 """Interface CAD (prova de conceito) — baseline e U-Net no ISLES-2022.
 
 Uso:
-  cd /Users/vitoriakelly/Documents/TCC
+  # a partir da raiz do projeto
   source .venv/bin/activate
   streamlit run pratica/app/app_streamlit.py
 """
@@ -31,6 +31,7 @@ from isles_common import (  # noqa: E402
     list_subjects,
     load_nii,
     mid_slice,
+    postprocess_mask,
 )
 
 st.set_page_config(
@@ -104,13 +105,22 @@ def load_unet(ckpt_path: str):
     return model, device, size, predict_volume
 
 
-def segment(method: str, dwi: np.ndarray, adc: np.ndarray, ckpt: Path | None) -> np.ndarray:
+def segment(
+    method: str,
+    dwi: np.ndarray,
+    adc: np.ndarray,
+    ckpt: Path | None,
+    do_postprocess: bool = True,
+) -> np.ndarray:
     if method == "Baseline (limiar)":
         return baseline_segment(dwi, adc)
     if ckpt is None or not ckpt.exists():
         raise FileNotFoundError("Checkpoint U-Net não encontrado. Treine o modelo antes.")
     model, device, size, predict_volume = load_unet(str(ckpt))
-    return predict_volume(model, dwi, adc, size=size, thr=0.5, device=device)
+    pred = predict_volume(model, dwi, adc, size=size, thr=0.5, device=device)
+    if do_postprocess:
+        pred = postprocess_mask(pred)
+    return pred
 
 
 def show_slice(dwi: np.ndarray, pred: np.ndarray, gt: np.ndarray | None, z: int, method: str) -> None:
@@ -152,13 +162,18 @@ def main() -> None:
         "Ferramenta de apoio — a decisão final é do especialista."
     )
 
-    default_ckpt = CKPT_DIR / "unet2d_isles_best.pt"
+    default_ckpt = CKPT_DIR / "unet2d_isles250_best.pt"
+    if not default_ckpt.exists():
+        default_ckpt = CKPT_DIR / "unet2d_isles_aug_best.pt"
+    if not default_ckpt.exists():
+        default_ckpt = CKPT_DIR / "unet2d_isles_best.pt"
 
     with st.sidebar:
         st.header("Configuração")
-        method = st.radio("Método", ["Baseline (limiar)", "U-Net"], index=0)
+        method = st.radio("Método", ["Baseline (limiar)", "U-Net"], index=1)
         ckpt_file = st.text_input("Checkpoint U-Net", value=str(default_ckpt))
         ckpt = Path(ckpt_file)
+        do_post = st.checkbox("Pós-processamento (U-Net)", value=True)
         if method == "U-Net" and not ckpt.exists():
             st.warning("Checkpoint ausente. Rode `train_unet.py` antes.")
 
@@ -178,7 +193,7 @@ def main() -> None:
                 with st.spinner("Processando..."):
                     dwi, adc, gt = load_case(subject)
                     try:
-                        pred = segment(method, dwi, adc, ckpt)
+                        pred = segment(method, dwi, adc, ckpt, do_postprocess=do_post)
                     except Exception as exc:  # noqa: BLE001
                         st.error(str(exc))
                         st.stop()
@@ -206,7 +221,7 @@ def main() -> None:
                             st.error("DWI e ADC com dimensões diferentes.")
                         else:
                             try:
-                                pred = segment(method, dwi, adc, ckpt)
+                                pred = segment(method, dwi, adc, ckpt, do_postprocess=do_post)
                             except Exception as exc:  # noqa: BLE001
                                 st.error(str(exc))
                                 st.stop()

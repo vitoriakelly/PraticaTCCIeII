@@ -2,7 +2,7 @@
 
 Exemplos:
   python pratica/scripts/train_unet.py --epochs 2 --max-subjects 8   # smoke
-  python pratica/scripts/train_unet.py --epochs 25                   # treino completo (40 casos)
+  python pratica/scripts/train_unet.py --epochs 25 --augment         # treino principal (todos os casos, 250)
 """
 
 from __future__ import annotations
@@ -105,6 +105,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--device", choices=["auto", "cpu", "mps", "cuda"], default="auto")
     p.add_argument("--num-workers", type=int, default=0)
     p.add_argument("--out-name", type=str, default="unet2d_isles")
+    p.add_argument("--augment", action="store_true", help="Flip/rot90 no treino")
     return p.parse_args()
 
 
@@ -118,14 +119,18 @@ def main() -> None:
         subjects = subjects[: args.max_subjects]
 
     splits = split_subjects(subjects, seed=args.seed)
-    print(f"Device: {device}")
+    print(f"Device: {device} | augment={args.augment}")
     print(
         f"Subjects: {len(subjects)} | "
         f"train={len(splits['train'])} val={len(splits['val'])} test={len(splits['test'])}"
     )
 
-    train_ds = IslesSliceDataset(splits["train"], size=args.size, seed=args.seed)
-    val_ds = IslesSliceDataset(splits["val"] or splits["train"][:1], size=args.size, seed=args.seed + 1)
+    train_ds = IslesSliceDataset(
+        splits["train"], size=args.size, seed=args.seed, augment=args.augment
+    )
+    val_ds = IslesSliceDataset(
+        splits["val"] or splits["train"][:1], size=args.size, seed=args.seed + 1, augment=False
+    )
     print(f"Fatias: train={len(train_ds)} val={len(val_ds)}")
 
     train_loader = DataLoader(

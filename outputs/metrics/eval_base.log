@@ -1,0 +1,24 @@
+Device: mps | split=test | n=6 | size=128 | postprocess=True
+  sub-strokecase0039: Dice=0.181 IoU=0.100 P=0.400 R=0.117 volGT=2.27mL t=0.87s
+  sub-strokecase0003: Dice=0.777 IoU=0.635 P=0.774 R=0.779 volGT=3.87mL t=0.38s
+  sub-strokecase0034: Dice=0.058 IoU=0.030 P=0.052 R=0.065 volGT=0.15mL t=0.39s
+  sub-strokecase0002: Dice=0.590 IoU=0.419 P=0.571 R=0.610 volGT=0.12mL t=0.39s
+  sub-strokecase0014: Dice=0.097 IoU=0.051 P=0.235 R=0.061 volGT=1.55mL t=0.39s
+  sub-strokecase0009: Dice=0.678 IoU=0.513 P=0.751 R=0.618 volGT=0.52mL t=0.40s
+
+Resumo:
+  n_evaluated: 6
+  split: test
+  checkpoint: pratica/outputs/checkpoints/unet2d_isles_best.pt
+  postprocess: True
+  dice_mean: 0.3968013620223654
+  dice_std: 0.3199861699392212
+  dice_median: 0.38558743169398907
+  iou_mean: 0.29110782163592624
+  iou_median: 0.259058239963671
+  precision_mean: 0.46401010012478583
+  recall_mean: 0.3749655653588239
+  infer_sec_mean: 0.4693333333333334
+  infer_sec_median: 0.3925
+  method: U-Net 2D (unet_base)
+CSV: /Users/vitoriakelly/Documents/TCC/pratica/outputs/metrics/unet_base_metrics_detailed.csv

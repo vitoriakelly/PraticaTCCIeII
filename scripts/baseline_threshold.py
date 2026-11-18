@@ -6,6 +6,7 @@ Usa limiar adaptativo em DWI + refinamentos morfológicos.
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -21,6 +22,7 @@ OUT_DIR = ROOT / "pratica" / "outputs"
 FIG_DIR = OUT_DIR / "figures"
 MET_DIR = OUT_DIR / "metrics"
 THESIS_FIG = ROOT / "TCC1_extracted" / "figuras"
+THESIS_FIG.mkdir(parents=True, exist_ok=True)
 
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 MET_DIR.mkdir(parents=True, exist_ok=True)
@@ -119,8 +121,20 @@ def save_qualitative(subject: str, dwi: np.ndarray, gt: np.ndarray, pred: np.nda
     plt.close(fig)
 
 
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser()
+    p.add_argument("--max-subjects", type=int, default=40,
+                   help="Primeiros N casos (padrão 40 = amostra do TCC I); 0 = todos")
+    return p.parse_args()
+
+
+def _select(subjects: list[str], n: int) -> list[str]:
+    return subjects[:n] if n > 0 else subjects
+
+
 def main() -> None:
-    subjects = list_subjects(DATA_DIR)
+    args = parse_args()
+    subjects = _select(list_subjects(DATA_DIR), args.max_subjects)
     rows = []
     best = None
 

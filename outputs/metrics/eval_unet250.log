@@ -1,0 +1,55 @@
+Device: mps | split=test | n=37 | size=128 | postprocess=True
+  sub-strokecase0045: Dice=0.000 IoU=0.000 P=1.000 R=0.000 volGT=0.10mL t=0.61s
+  sub-strokecase0232: Dice=0.757 IoU=0.609 P=0.736 R=0.780 volGT=0.18mL t=0.17s
+  sub-strokecase0228: Dice=0.398 IoU=0.248 P=0.840 R=0.261 volGT=0.71mL t=0.20s
+  sub-strokecase0196: Dice=0.715 IoU=0.556 P=0.624 R=0.837 volGT=1.68mL t=0.39s
+  sub-strokecase0035: Dice=0.000 IoU=0.000 P=1.000 R=0.000 volGT=0.02mL t=0.42s
+  sub-strokecase0031: Dice=0.864 IoU=0.760 P=0.840 R=0.889 volGT=11.63mL t=0.40s
+  sub-strokecase0059: Dice=0.844 IoU=0.730 P=0.970 R=0.747 volGT=0.09mL t=0.59s
+  sub-strokecase0203: Dice=0.058 IoU=0.030 P=0.040 R=0.111 volGT=0.14mL t=0.42s
+  sub-strokecase0036: Dice=0.758 IoU=0.611 P=0.655 R=0.901 volGT=2.32mL t=0.47s
+  sub-strokecase0078: Dice=0.832 IoU=0.713 P=0.949 R=0.741 volGT=14.05mL t=0.41s
+  sub-strokecase0183: Dice=0.567 IoU=0.396 P=0.488 R=0.676 volGT=0.65mL t=0.46s
+  sub-strokecase0050: Dice=0.524 IoU=0.355 P=0.966 R=0.359 volGT=1.93mL t=0.45s
+  sub-strokecase0007: Dice=0.012 IoU=0.006 P=0.006 R=0.137 volGT=0.44mL t=0.87s
+  sub-strokecase0103: Dice=0.000 IoU=0.000 P=1.000 R=0.000 volGT=0.02mL t=1.12s
+  sub-strokecase0176: Dice=0.874 IoU=0.777 P=0.790 R=0.979 volGT=2.78mL t=0.49s
+  sub-strokecase0140: Dice=0.258 IoU=0.148 P=0.895 R=0.151 volGT=17.67mL t=1.01s
+  sub-strokecase0231: Dice=0.715 IoU=0.556 P=0.837 R=0.624 volGT=4.08mL t=0.85s
+  sub-strokecase0042: Dice=0.752 IoU=0.603 P=0.960 R=0.618 volGT=0.59mL t=0.61s
+  sub-strokecase0111: Dice=0.000 IoU=0.000 P=1.000 R=0.000 volGT=0.02mL t=0.62s
+  sub-strokecase0023: Dice=0.553 IoU=0.382 P=0.996 R=0.383 volGT=60.27mL t=0.56s
+  sub-strokecase0020: Dice=0.872 IoU=0.774 P=0.969 R=0.793 volGT=1.11mL t=0.53s
+  sub-strokecase0164: Dice=0.811 IoU=0.682 P=0.744 R=0.891 volGT=1.81mL t=0.20s
+  sub-strokecase0065: Dice=0.821 IoU=0.697 P=0.976 R=0.709 volGT=3.39mL t=0.53s
+  sub-strokecase0048: Dice=0.759 IoU=0.611 P=0.869 R=0.673 volGT=6.88mL t=0.55s
+  sub-strokecase0114: Dice=0.688 IoU=0.524 P=0.527 R=0.990 volGT=0.77mL t=0.65s
+  sub-strokecase0238: Dice=0.721 IoU=0.564 P=0.815 R=0.646 volGT=2.04mL t=0.35s
+  sub-strokecase0141: Dice=0.000 IoU=0.000 P=1.000 R=0.000 volGT=0.01mL t=0.58s
+  sub-strokecase0182: Dice=0.000 IoU=0.000 P=1.000 R=0.000 volGT=0.10mL t=0.20s
+  sub-strokecase0236: Dice=0.766 IoU=0.620 P=0.754 R=0.777 volGT=4.44mL t=0.37s
+  sub-strokecase0015: Dice=0.866 IoU=0.764 P=0.892 R=0.843 volGT=1.65mL t=0.50s
+  sub-strokecase0142: Dice=0.658 IoU=0.490 P=0.559 R=0.801 volGT=0.32mL t=0.48s
+  sub-strokecase0195: Dice=0.694 IoU=0.531 P=0.731 R=0.660 volGT=1.22mL t=0.19s
+  sub-strokecase0037: Dice=0.541 IoU=0.371 P=0.958 R=0.377 volGT=0.06mL t=0.48s
+  sub-strokecase0098: Dice=0.000 IoU=0.000 P=1.000 R=0.000 volGT=0.17mL t=0.50s
+  sub-strokecase0194: Dice=0.664 IoU=0.497 P=0.886 R=0.531 volGT=0.98mL t=0.21s
+  sub-strokecase0206: Dice=0.660 IoU=0.493 P=0.906 R=0.519 volGT=0.80mL t=0.36s
+  sub-strokecase0137: Dice=0.275 IoU=0.160 P=0.181 R=0.573 volGT=0.28mL t=0.35s
+
+Resumo:
+  n_evaluated: 37
+  split: test
+  checkpoint: pratica/outputs/checkpoints/unet2d_isles250_best.pt
+  postprocess: True
+  dice_mean: 0.5210890304605371
+  dice_std: 0.3289877670799529
+  dice_median: 0.6641221374045801
+  iou_mean: 0.4124478823018161
+  iou_median: 0.49714285714285716
+  precision_mean: 0.7935206607485994
+  recall_mean: 0.5129601755585577
+  infer_sec_mean: 0.49051351351351363
+  infer_sec_median: 0.478
+  method: U-Net 2D (unet250)
+CSV: /Users/vitoriakelly/Documents/TCC/pratica/outputs/metrics/unet250_metrics_detailed.csv

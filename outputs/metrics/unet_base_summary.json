@@ -1,0 +1,16 @@
+{
+  "n_evaluated": 6,
+  "split": "test",
+  "checkpoint": "pratica/outputs/checkpoints/unet2d_isles_best.pt",
+  "postprocess": true,
+  "dice_mean": 0.3968013620223654,
+  "dice_std": 0.3199861699392212,
+  "dice_median": 0.38558743169398907,
+  "iou_mean": 0.29110782163592624,
+  "iou_median": 0.259058239963671,
+  "precision_mean": 0.46401010012478583,
+  "recall_mean": 0.3749655653588239,
+  "infer_sec_mean": 0.4693333333333334,
+  "infer_sec_median": 0.3925,
+  "method": "U-Net 2D (unet_base)"
+}
